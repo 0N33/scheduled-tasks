@@ -1,38 +1,61 @@
-# To run and test the code you need to update 4 places:
-# 1. Change MY_EMAIL/MY_PASSWORD to your own details.
-# 2. Go to your email provider and make it allow less secure apps.
-# 3. Update the SMTP ADDRESS to match your email provider.
-# 4. Update birthdays.csv to contain today's month and day.
-# See the solution video in the 100 Days of Python Course for explainations.
+##################### Extra Hard Starting Project ######################
 
-
-from datetime import datetime
-import pandas
-import random
-import smtplib
 import os
+# 1. Update the birthdays.csv
+import pandas
+import smtplib
+import random
 
-# import os and use it to get the Github repository secrets
-MY_EMAIL = os.environ.get("MY_EMAIL")
-MY_PASSWORD = os.environ.get("MY_PASSWORD")
+# 2. Check if today matches a birthday in the birthdays.csv
+import datetime as dt
 
-today = datetime.now()
-today_tuple = (today.month, today.day)
+#-----------------------personal info---------------------------#
+sender_email_adress = os.environ.get("sender_email_adress")
+sender_password =  os.environ.get("sender_password")
 
-data = pandas.read_csv("birthdays.csv")
-birthdays_dict = {(data_row["month"], data_row["day"])                  : data_row for (index, data_row) in data.iterrows()}
-if today_tuple in birthdays_dict:
-    birthday_person = birthdays_dict[today_tuple]
-    file_path = f"letter_templates/letter_{random.randint(1, 3)}.txt"
-    with open(file_path) as letter_file:
-        contents = letter_file.read()
-        contents = contents.replace("[NAME]", birthday_person["name"])
 
-    with smtplib.SMTP("YOUR EMAIL PROVIDER SMTP SERVER ADDRESS") as connection:
-        connection.starttls()
-        connection.login(MY_EMAIL, MY_PASSWORD)
-        connection.sendmail(
-            from_addr=MY_EMAIL,
-            to_addrs=birthday_person["email"],
-            msg=f"Subject:Happy Birthday!\n\n{contents}"
-        )
+now = dt.datetime.now()
+now_month = now.month
+now_day_date = now.day
+
+try: 
+    data = pandas.read_csv("./Birthday wisher/birthdays.csv")
+except FileNotFoundError:
+    print("No file as birthday.csv")
+
+else:
+
+    todays_data_row = data[(data.month == now_month) & (data.day == now_day_date)]
+
+    if todays_data_row.empty:
+        print("No birthdays today!")
+
+    else:
+        for (index,rows) in todays_data_row.iterrows():
+            reciever_name = rows["name"]
+            reciever_email = rows.email
+
+
+            random_file_number = random.randint(1,3)
+
+            try:
+                with open(f"./Birthday wisher/letter_templates/letter_{random_file_number}.txt", "r") as letter:
+                    letter_content = letter.read()
+                    final_content = letter_content.replace("[NAME]", reciever_name)
+
+                with smtplib.SMTP("smtp.gmail.com", port=587) as connection:
+                    connection.starttls()
+                    connection.login(user=sender_email_adress,password=sender_password)
+                    connection.sendmail(from_addr=sender_email_adress,
+                                        to_addrs=reciever_email,
+                                        msg=f"Subject:Happy Birthday {reciever_name}!!!\n\n{final_content}"
+                                        )
+
+            except FileNotFoundError:
+                print("No file found!\nNot continuing")
+
+
+
+
+
+

@@ -10,8 +10,8 @@ import random
 import datetime as dt
 
 #-----------------------personal info---------------------------#
-sender_email_adress = os.environ.get("sender_email_adress")
-sender_password =  os.environ.get("sender_password")
+sender_email_adress = os.environ.get("MY_EMAIL")
+sender_password =  os.environ.get("MY_PASSWORD")
 
 
 now = dt.datetime.now()
